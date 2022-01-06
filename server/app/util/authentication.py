@@ -40,7 +40,7 @@ def ensure_user () -> wrappers.Response:
             if request.headers.get("Signed-Message", None) is not None:
                 try:
                     sid, data = args
-                    user = User.query.filter_by(id=data["telephone"]).one()
+                    user = User.query.filter_by(telephone=data["telephone"]).one()
                     sgn_message = request.headers["Signed-Message"]
                     verify_signed_message(user, sgn_message)
 
@@ -110,7 +110,7 @@ def authenticate_user () -> wrappers.Response:
             try:
                 sid, data = args
                 sgn_message = data.pop("Signed-Message")
-                user = User.query.filter_by(id=data.pop("telephone")).one()
+                user = User.query.filter_by(telephone=data.pop("telephone")).one()
 
                 data = data.pop("body")
                 verify_signed_message(user, sgn_message)
