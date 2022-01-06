@@ -12,6 +12,7 @@ headers_server = {
 
 def create_chat (owner: User, user: User, opkeys: list[OPKey], data: dict) -> None:
     for device in user.devices:
+        print(device)
         emit(
             "create-chat",
             {
@@ -19,7 +20,7 @@ def create_chat (owner: User, user: User, opkeys: list[OPKey], data: dict) -> No
                     "name": owner.name,
                     "telephone": owner.telephone,
                     "description": owner.description,
-                    "chat_id": data["chat_id"],
+                    "chat_id": data["owner"]["chat_id"],
                     "keys": {
                         "pb_keys": {
                             "IK": owner.id_key,

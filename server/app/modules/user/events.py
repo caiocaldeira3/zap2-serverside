@@ -17,7 +17,7 @@ RequestData = Union[str, dict[str, str]]
 @authenticate_user()
 def handle_create_chat (sid: str, data: dict[str, RequestData]) -> None:
     try:
-        owner = User.query.filter_by(telephone=data["telephone"]).one()
+        owner = User.query.filter_by(telephone=data["owner"]["telephone"]).one()
         users = User.query.filter(User.telephone.in_(data["users"])).all()
 
         data.pop("users", None)
@@ -35,7 +35,7 @@ def handle_create_chat (sid: str, data: dict[str, RequestData]) -> None:
 @authenticate_user()
 def handle_confirm_create_chat (sid: str, data: dict[str, RequestData]) -> None:
     try:
-        owner = User.query.filter_by(telephone=data.pop("owner")).one()
+        owner = User.query.filter_by(telephone=data["owner"]["telephone"]).one()
         for device in owner.devices:
             emit("confirm-create-chat", data, to=device.socket_id)
 
