@@ -30,7 +30,7 @@ After this project becomes robust enough I aim to:
 ### Running the program
 To deploy the server you should first install all the requirements executing the following pip command `pip install -r requirements.txt` on the root folder of this repository. After that, assuming you are using one appropriated python version, 3.9.7+, you should traverse to the <i>server</i> folder and run the run.py script with, `python run.py`. After that the server should be running locally.
 
-Then to simulate users using the server you should read the instructions on [this repository](https://github.com/caiocaldeira3/zap2-serverside).
+Then to simulate users using the server you should read the instructions on [this repository](https://github.com/caiocaldeira3/zap2-userside).
 
 
 
