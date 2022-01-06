@@ -51,10 +51,6 @@ def ensure_user () -> wrappers.Response:
                     db.session.add_all(user.devices)
                     db.session.commit()
 
-                    user = User.query.filter_by(id=data["telephone"]).one()
-                    print(user.devices)
-
-
                     return f(*args, **kwargs)
 
                 except Exception as exc:
