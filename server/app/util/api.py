@@ -1,5 +1,3 @@
-import os
-
 from flask_socketio import emit, send
 
 from app.models.user import User
@@ -11,7 +9,7 @@ def create_chat (owner: User, user: User, opkeys: list[OPKey], data: dict) -> No
             "create-chat",
             {
                 "status": "pending",
-                "msg": "Creating chat between {owner.telephone} and {user.telephone}",
+                "msg": f"Creating chat between {owner.telephone} and {user.telephone}",
                 "data": {
                     "owner": {
                         "name": owner.name,
