@@ -106,7 +106,6 @@ def authenticate_user () -> wrappers.Response:
         @wraps(f)
         def decorated(*args, **kwargs):
             try:
-                print("HERE")
                 sid, data = args
                 sgn_message = data.pop("Signed-Message")
                 user = User.query.filter_by(telephone=data.pop("telephone")).one()

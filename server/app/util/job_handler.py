@@ -5,7 +5,6 @@ from sqlalchemy.sql.expression import func
 from app.models.user import User
 from app.models.device import Device
 
-from app import db
 from app import job_queue
 
 def job_handler () -> None:
@@ -15,7 +14,6 @@ def job_handler () -> None:
             .group_by(User.id)\
             .having(func.count(Device.id) > 0)\
         .all()
-        print(users)
 
         for user in users:
             job_queue.resolve_jobs(user.id)

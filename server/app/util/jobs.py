@@ -11,6 +11,8 @@ from app.util.exc import (
 )
 
 from app import db
+from app import sio
+from app import flask_app
 
 RequestData = dict[str, Union[str, dict[str, str]]]
 MAX_RETRIES = 5
@@ -52,47 +54,43 @@ class AddUserDeviceJob (Job):
 
 class CreateChatJob (Job):
     def solve (self) -> None:
-        import app.util.api as api
-
         user = User.query.filter_by(id=self.user_id).one()
         if len(user.devices) == 0:
             raise UserDeviceNotFound
 
         for device in user.devices:
-            api.retry_event(self.data, device.socket_id, "create-chat")
+            with flask_app.app_context():
+                sio.emit("create-chat", self.data, to=device.socket_id)
 
 class ConfirmCreateChatJob (Job):
     def solve (self) -> None:
-        import app.util.api as api
-
         owner = User.query.filter_by(id=self.user_id).one()
         if len(owner.devices) == 0:
             raise UserDeviceNotFound
 
         for device in owner.devices:
-            api.retry_event(self.data, device.socket_id, "confirm-create-chat")
+            with flask_app.app_context():
+                sio.emit("confirm-create-chat", self.data, to=device.socket_id)
 
 class SendMessageJob (Job):
     def solve (self) -> None:
-        import app.util.api as api
-
         receiver = User.query.filter_by(id=self.user_id).one()
         if len(receiver.devices) == 0:
             raise UserDeviceNotFound
 
         for device in receiver.devices:
-            api.retry_event(self.data, device.socket_id, "confirm-message")
+            with flask_app.app_context():
+                sio.send(self.data, to=device.socket_id)
 
 class ConfirmMessageJob (Job):
     def solve (self) -> None:
-        import app.util.api as api
-
         sender = User.query.filter_by(id=self.user_id).one()
         if len(sender.devices) == 0:
             raise UserDeviceNotFound
 
         for device in sender.devices:
-            api.retry_event(self.data, device.socket_id)
+            with flask_app.app_context():
+                sio.emit("confirm-message", self.data, to=device.socket_id)
 
 Jobs = Union[list[Job], dict[str, list[Job]]]
 

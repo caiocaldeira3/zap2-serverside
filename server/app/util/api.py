@@ -75,10 +75,3 @@ def send_message (receiver: User, req_info: dict) -> None:
             print(exc)
 
             raise Exception
-
-def retry_event (data: dict, socket_id: str, event: str = None) -> None:
-    if event is None:
-        send(data, to=socket_id)
-
-    else:
-        emit(event, data, to=socket_id)

@@ -1,4 +1,4 @@
-import threading
+import eventlet
 
 # Import flask and template operators
 from flask import Flask
@@ -44,5 +44,8 @@ import app.modules.user.events
 # Build the database:
 # This will create the database file using SQLAlchemy
 
-threading.Thread(target=job_handler, daemon=True).start()
 db.create_all()
+
+# Create background task to send tasks
+eventlet.monkey_patch()
+sio.start_background_task(job_handler)
