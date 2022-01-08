@@ -15,11 +15,11 @@ My initial objectives with this project are:
   | Establish the connection between two users through the application                          | :heavy_check_mark: |
   | Implement group chats with encryption                                                       | :x: |
   | Add expiring tokens with something like redis to verify the authenticity of the connection  | :x: |
-  | Deal with server connection problems after signup                                           | :x: |
-  | Identify and solve problems of data continuity without losing the chat security             | :x: |
+  | Deal with server connection problems after signup                                           | :heavy_check_mark: |
+  | Identify and solve problems of data continuity without losing the chat security             | :heavy_check_mark: |
   | Implement a half-decent graphical interface                                                 | :white_check_mark: |
   | Make the chat server available on a web domain so it can be tested online                   | :x: |
-  | Implement a dockerfile to make it easier to deploy the application                          | :x: |
+
 
 After this project becomes robust enough I aim to:
   |                                                                                                                         |     |
