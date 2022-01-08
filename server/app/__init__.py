@@ -1,3 +1,5 @@
+import threading
+
 # Import flask and template operators
 from flask import Flask
 from flask_cors import CORS
@@ -28,6 +30,8 @@ migrate = Migrate(flask_app, db)
 from app.util.jobs import JobQueue
 job_queue = JobQueue()
 
+from app.util.job_handler import job_handler
+
 # Sample HTTP error handling
 #@app.errorhandler(404)
 #def not_found (error: Exception) -> wrappers.Response:
@@ -40,4 +44,5 @@ import app.modules.user.events
 # Build the database:
 # This will create the database file using SQLAlchemy
 
+threading.Thread(target=job_handler, daemon=True).start()
 db.create_all()

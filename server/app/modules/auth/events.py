@@ -27,8 +27,6 @@ def handle_connect (sid: str, data: dict[str, str], status: str) -> None:
         }
     })
 
-    job_queue.resolve_jobs(user.id)
-
 @sio.on("disconnect")
 def disconnect () -> None:
     Device.query.filter_by(socket_id=request.sid).delete()

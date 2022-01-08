@@ -1,21 +1,20 @@
 import dataclasses as dc
 
 from typing import Union
-from flask_socketio import emit, send
 from abc import ABCMeta, ABC, abstractmethod
 
 from app.models.user import User
+from app.models.device import Device
 
 from app.util.exc import (
     NotJobInstance, PriorityRangeError, UserDeviceNotFound
 )
 
-
-from app import sio
+from app import db
 
 RequestData = dict[str, Union[str, dict[str, str]]]
 MAX_RETRIES = 5
-MIN_PRIORITY = 1
+MIN_PRIORITY = 0
 MAX_PRIORITY = 3
 
 @dc.dataclass(init=True)
@@ -38,41 +37,62 @@ class Job (ABC):
     def identify_job_type (self) -> None:
         print(type(self))
 
+class AddUserDeviceJob (Job):
+    def solve (self) -> None:
+        sid = self.data["sid"]
+        user_id = self.data["user_id"]
+
+        user = User.query.filter_by(id=user_id).one()
+        device = Device(socket_id=sid)
+        user.devices.append(device)
+
+        db.session.add(user)
+        db.session.add_all(user.devices)
+        db.session.commit()
+
 class CreateChatJob (Job):
     def solve (self) -> None:
+        import app.util.api as api
+
         user = User.query.filter_by(id=self.user_id).one()
         if len(user.devices) == 0:
             raise UserDeviceNotFound
 
         for device in user.devices:
-            emit("create-chat", data=self.data, to=device.socket_id)
+            api.retry_event(self.data, device.socket_id, "create-chat")
 
 class ConfirmCreateChatJob (Job):
     def solve (self) -> None:
+        import app.util.api as api
+
         owner = User.query.filter_by(id=self.user_id).one()
         if len(owner.devices) == 0:
             raise UserDeviceNotFound
 
         for device in owner.devices:
-            emit("confirm-create-chat", data=self.data, to=device.socket_id)
+            api.retry_event(self.data, device.socket_id, "confirm-create-chat")
 
 class SendMessageJob (Job):
     def solve (self) -> None:
+        import app.util.api as api
+
         receiver = User.query.filter_by(id=self.user_id).one()
         if len(receiver.devices) == 0:
             raise UserDeviceNotFound
 
         for device in receiver.devices:
-            emit("send-message", data=self.data, to=device.socket_id)
+            api.retry_event(self.data, device.socket_id, "confirm-message")
 
 class ConfirmMessageJob (Job):
     def solve (self) -> None:
+        import app.util.api as api
+
         sender = User.query.filter_by(id=self.user_id).one()
         if len(sender.devices) == 0:
             raise UserDeviceNotFound
 
         for device in sender.devices:
-            emit("confirm-message", data=self.data, to=device.socket_id)
+            api.retry_event(self.data, device.socket_id)
 
 Jobs = Union[list[Job], dict[str, list[Job]]]
 
@@ -100,33 +120,37 @@ class JobQueue:
 
     def _resolve_jobs (self, jobs: list[Job]) -> list[Job]:
         failed_jobs = []
+
         for job in jobs:
             try:
                 job.solve()
 
-            except ConnectionRefusedError:
+            except ConnectionRefusedError as exc:
+                print(exc)
                 if job.increment_retries() < MAX_RETRIES:
                     failed_jobs.append(job)
 
             except UserDeviceNotFound:
+                print(exc)
                 if job.increment_retries() < MAX_RETRIES:
                     failed_jobs.append(job)
 
             except Exception as exc:
                 print(f"Ill formed job of type {type(job)}")
-                print(exc)
+                raise exc
 
         return failed_jobs
 
-    def resolve_jobs (self, user_id: int, priority: int = None) -> None:
+    def resolve_jobs (self, user_id: int, priority: int = None) -> bool:
         if self.job_dict.get(user_id, None) is None:
-            return
+            return False
 
         elif priority is None:
             for curr_priority in range(MIN_PRIORITY, MAX_PRIORITY):
+                print(curr_priority, self.job_dict.get(user_id, [ list(), list(), list() ])[curr_priority])
                 self.resolve_jobs(user_id, priority=curr_priority)
 
-            return
+            return False
 
         if MIN_PRIORITY <= priority <= MAX_PRIORITY:
             self.job_dict[user_id][priority] = self._resolve_jobs(self.job_dict[user_id][priority])
@@ -136,7 +160,8 @@ class JobQueue:
 
 
         for curr_priority in range(MIN_PRIORITY, MAX_PRIORITY):
-            if len(self.job_dict[user_id][priority]) > 0:
-                return
+            if len(self.job_dict[user_id][curr_priority]) > 0:
+                return False
 
         self.job_dict.pop(user_id, None)
+        return True

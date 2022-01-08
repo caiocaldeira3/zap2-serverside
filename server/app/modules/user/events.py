@@ -53,7 +53,7 @@ def handle_confirm_create_chat (sid: str, data: dict[str, RequestData]) -> None:
 
         for device in owner.devices:
             try:
-                emit("confirm-create-chat", data=resp_data, to=device.socket_id)
+                emit("confirm-create-chat", resp_data, to=device.socket_id)
 
             except ConnectionRefusedError:
                 job_queue.add_job(owner.id, 2, ConfirmCreateChatJob, resp_data)
@@ -99,7 +99,7 @@ def handle_confirm_message (sid: str, data: dict[str, RequestData]) -> None:
 
         for device in sender.devices:
             try:
-                emit("confirm-message", data=resp_data, to=device.socket_id)
+                emit("confirm-message", resp_data, to=device.socket_id)
 
             except ConnectionRefusedError:
                 job_queue.add_job(sender.id, 2, ConfirmMessageJob, resp_data)

@@ -1,4 +1,5 @@
 import os
+import threading
 
 from typing import Callable
 from functools import wraps
@@ -10,9 +11,11 @@ from app.models.user import User
 from app.models.device import Device
 from app.models.public_keys import OPKey
 
+from app.util.jobs import AddUserDeviceJob
 from app.util.crypto import verify_signed_message
 
 from app import db
+from app import job_queue
 
 def authenticate_source () -> wrappers.Response:
     def wrapper (f: Callable) -> wrappers.Response:
@@ -44,12 +47,7 @@ def ensure_user () -> wrappers.Response:
                     sgn_message = request.headers["Signed-Message"]
                     verify_signed_message(user, sgn_message)
 
-                    device = Device(socket_id=sid)
-                    user.devices.append(device)
-
-                    db.session.add(user)
-                    db.session.add_all(user.devices)
-                    db.session.commit()
+                    job_queue.add_job(-1, 0, AddUserDeviceJob, {"user_id": user.id, "sid": sid})
 
                     return f(*args, "ok", **kwargs)
 
@@ -108,6 +106,7 @@ def authenticate_user () -> wrappers.Response:
         @wraps(f)
         def decorated(*args, **kwargs):
             try:
+                print("HERE")
                 sid, data = args
                 sgn_message = data.pop("Signed-Message")
                 user = User.query.filter_by(telephone=data.pop("telephone")).one()
