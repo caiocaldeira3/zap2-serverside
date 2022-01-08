@@ -51,7 +51,7 @@ def ensure_user () -> wrappers.Response:
                     db.session.add_all(user.devices)
                     db.session.commit()
 
-                    return f(*args, **kwargs)
+                    return f(*args, "ok", **kwargs)
 
                 except Exception as exc:
                     print(exc)
@@ -88,7 +88,7 @@ def ensure_user () -> wrappers.Response:
 
                     return f(sid, {
                         "telephone": user.telephone
-                    }, **kwargs)
+                    }, "created", **kwargs)
 
                 except Exception as exc:
                     print(exc)

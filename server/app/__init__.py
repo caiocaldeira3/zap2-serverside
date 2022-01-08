@@ -25,6 +25,9 @@ sio = SocketIO(flask_app, async_mode="eventlet")
 db = SQLAlchemy(flask_app)
 migrate = Migrate(flask_app, db)
 
+from app.util.jobs import JobQueue
+job_queue = JobQueue()
+
 # Sample HTTP error handling
 #@app.errorhandler(404)
 #def not_found (error: Exception) -> wrappers.Response:
