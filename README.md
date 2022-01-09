@@ -20,7 +20,7 @@ My initial objectives with this project are:
   | Implement a half-decent graphical interface                                                 | ✅ |
   | Implement dockerfile and docker-compose to deploy application                               | ✔️ |
   | Make the chat server available on a web domain so it can be tested online                   | ✔️ |
-  | Add the deploy of the chat server as a github action for this repository                    | :x: |
+  | Add the deploy of the chat server as a github action for this repository                    | ✔️ |
 
 
 After this project becomes robust enough I aim to:
