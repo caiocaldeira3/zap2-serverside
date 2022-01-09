@@ -10,16 +10,17 @@ My initial objectives with this project are:
   |                                                                                             |     |
   | --------------------------------------------------------------------------------------------|-----| 
   | Verify provided data, such as checking if the telephone is valid                            | :x: |
-  | Implement the Double Ratchet Encryption                                                     | :heavy_check_mark: |
+  | Implement the Double Ratchet Encryption                                                     | ✔️ |
   | Generate new keys for new chatrooms as old keys are used                                    | :x: |
-  | Establish the connection between two users through the application                          | :heavy_check_mark: |
+  | Establish the connection between two users through the application                          | ✔️ |
   | Implement group chats with encryption                                                       | :x: |
   | Add expiring tokens with something like redis to verify the authenticity of the connection  | :x: |
-  | Deal with server connection problems after signup                                           | :heavy_check_mark: |
-  | Identify and solve problems of data continuity without losing the chat security             | :heavy_check_mark: |
-  | Implement a half-decent graphical interface                                                 | :white_check_mark: |
-  | Implement dockerfile and docker-compose to deploy application                               | :heavy_check_mark: |
-  | Make the chat server available on a web domain so it can be tested online                   | :x: |
+  | Deal with server connection problems after signup                                           | ✔️ |
+  | Identify and solve problems of data continuity without losing the chat security             | ✔️ |
+  | Implement a half-decent graphical interface                                                 | ✅ |
+  | Implement dockerfile and docker-compose to deploy application                               | ✔️ |
+  | Make the chat server available on a web domain so it can be tested online                   | ✔️ |
+  | Add the deploy of the chat server as a github action for this repository                    | :x: |
 
 
 After this project becomes robust enough I aim to:
