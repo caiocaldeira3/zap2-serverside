@@ -19,4 +19,4 @@ def exit_handler():
 atexit.register(exit_handler)
 
 if __name__ == '__main__':
-    sio.run(flask_app, use_reloader=False)
+    sio.run(flask_app, host="0.0.0.0", use_reloader=False)
