@@ -18,6 +18,7 @@ My initial objectives with this project are:
   | Deal with server connection problems after signup                                           | :heavy_check_mark: |
   | Identify and solve problems of data continuity without losing the chat security             | :heavy_check_mark: |
   | Implement a half-decent graphical interface                                                 | :white_check_mark: |
+  | Implement dockerfile and docker-compose to deploy application                               | :heavy_check_mark: |
   | Make the chat server available on a web domain so it can be tested online                   | :x: |
 
 
@@ -28,7 +29,27 @@ After this project becomes robust enough I aim to:
   | Study the possibility of using algorithms for Self-Balancing networks on the P2P web and it's impact on limiting errors | :x: |
 
 ### Running the program
-To deploy the server you should first install all the requirements executing the following pip command `pip install -r requirements.txt` on the root folder of this repository. After that, assuming you are using one appropriated python version, 3.9.7+, you should traverse to the <i>server</i> folder and run the run.py script with, `python run.py`. After that the server should be running locally.
+It is recommended to deploy the server using the docker-compose tool, but it is possible to deploy it manually, on your localhost. 
+
+#### Using docker-compose (Recommended)
+On the root folder from the repository type the command  
+```
+docker-compose up -d
+```
+
+#### Manually
+To deploy the server manually it is necessary to install all python requirements executing:
+```
+pip install -r requirements.build.txt
+pip install -r requirements.txt
+```
+PS: It is advisable to execute these commands separeted due to the necessity of having the wheel module already installed for the installation of the other modules.  
+
+After that, assuming you are using an appropriated python version, 3.9.7+ should do, you should traverse to the <i>server</i> folder and run:
+```
+python run.py
+```
+With that the server should be up and running.
 
 Then to simulate users using the server you should read the instructions on [this repository](https://github.com/caiocaldeira3/zap2-userside).
 
