@@ -32,7 +32,7 @@ After this project becomes robust enough I aim to:
 It is recommended to deploy the server using the docker-compose tool, but it is possible to deploy it manually, on your localhost. 
 
 #### Using docker-compose (Recommended)
-On the root folder from the repository type the command  
+On the repository's root folder execute:  
 ```
 docker-compose up -d
 ```
