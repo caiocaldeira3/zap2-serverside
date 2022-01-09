@@ -14,7 +14,7 @@ from app.models.device import Device
 
 from app import db
 from app import sio
-from app import flask_app as application
+from app import flask_app
 
 def exit_handler():
     Device.query.delete()
@@ -24,4 +24,4 @@ atexit.register(exit_handler)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    sio.run(application, host="0.0.0.0", port=port, use_reloader=False)
+    sio.run(flask_app, host="0.0.0.0", port=port, use_reloader=False)
