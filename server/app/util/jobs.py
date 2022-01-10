@@ -121,7 +121,7 @@ class JobQueue:
 
         for job in jobs:
             try:
-                print(self.user_id, job)
+                print(job.user_id, job)
                 job.solve()
 
             except ConnectionRefusedError as exc:
