@@ -121,6 +121,7 @@ class JobQueue:
 
         for job in jobs:
             try:
+                print(self.user_id, job)
                 job.solve()
 
             except ConnectionRefusedError as exc:
@@ -145,7 +146,6 @@ class JobQueue:
 
         elif priority is None:
             for curr_priority in range(MIN_PRIORITY, MAX_PRIORITY):
-                print(curr_priority, self.job_dict.get(user_id, [ list(), list(), list() ])[curr_priority])
                 self.resolve_jobs(user_id, priority=curr_priority)
 
             return False

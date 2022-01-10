@@ -20,4 +20,4 @@ def job_handler () -> None:
 
         job_queue.resolve_jobs(-1, priority=0)
 
-        time.sleep(3)
+        time.sleep(5)
