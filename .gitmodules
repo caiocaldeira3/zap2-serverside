@@ -1,0 +1,3 @@
+[submodule "user-repo"]
+	path = user-repo
+	url = git@github.com:caiocaldeira3/zap2-userside.git
