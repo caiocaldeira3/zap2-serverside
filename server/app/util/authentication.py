@@ -1,20 +1,16 @@
 import os
-
-from typing import Callable
+from collections.abc import Callable
 from functools import wraps
 
-from flask import request, wrappers
-from flask_socketio import emit, ConnectionRefusedError
-
-from app.models.user import User
+from app import db, job_queue
 from app.models.device import Device
 from app.models.public_keys import OPKey
-
-from app.util.jobs import AddUserDeviceJob
+from app.models.user import User
 from app.util.crypto import verify_signed_message
+from app.util.jobs import AddUserDeviceJob
+from flask import request, wrappers
+from flask_socketio import ConnectionRefusedError, emit
 
-from app import db
-from app import job_queue
 
 def authenticate_source () -> wrappers.Response:
     def wrapper (f: Callable) -> wrappers.Response:

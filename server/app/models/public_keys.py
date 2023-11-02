@@ -1,5 +1,6 @@
 from app import db
 
+
 # Define a OPKey model
 class OPKey (db.Model):
 

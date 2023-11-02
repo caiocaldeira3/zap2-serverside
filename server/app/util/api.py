@@ -1,12 +1,9 @@
+from app import job_queue
+from app.models.public_keys import OPKey
+from app.models.user import User
+from app.util.jobs import CreateChatJob, SendMessageJob
 from flask_socketio import emit, send
 
-from app.models.user import User
-from app.models.public_keys import OPKey
-
-from app.util.jobs import CreateChatJob, SendMessageJob
-
-from app import sio
-from app import job_queue
 
 def create_chat (owner: User, user: User, opkeys: list[OPKey], req_info: dict) -> None:
     data = {

@@ -1,15 +1,12 @@
 import eventlet
-
 # Import flask and template operators
 from flask import Flask
 from flask_cors import CORS
-from flask_socketio import SocketIO
-
-# Import SQLAlchemy
-from flask_sqlalchemy import SQLAlchemy
-
 # Import Migration Module
 from flask_migrate import Migrate
+from flask_socketio import SocketIO
+# Import SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
 
 # Import Util Modules
 # from app.util.responses import NotFoundError
@@ -28,8 +25,12 @@ db = SQLAlchemy(flask_app)
 migrate = Migrate(flask_app, db)
 
 from app.util.jobs import JobQueue
+
 job_queue = JobQueue()
 
+# Import a module / component using its blueprint handler variable (mod_auth)
+import app.modules.auth.events
+import app.modules.user.events
 from app.util.job_handler import job_handler
 
 # Sample HTTP error handling
@@ -37,7 +38,6 @@ from app.util.job_handler import job_handler
 #def not_found (error: Exception) -> wrappers.Response:
 #    return NotFoundError
 
-# Import a module / component using its blueprint handler variable (mod_auth)
 import app.modules.auth.events
 import app.modules.user.events
 

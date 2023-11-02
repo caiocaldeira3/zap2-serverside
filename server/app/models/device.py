@@ -1,5 +1,6 @@
 from app import db
 
+
 # Define a Device model
 class Device (db.Model):
 

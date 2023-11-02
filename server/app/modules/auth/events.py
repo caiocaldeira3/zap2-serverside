@@ -1,14 +1,10 @@
+from app import db, job_queue, sio
+from app.models.device import Device
+from app.models.user import User
+from app.util.authentication import authenticate_source, ensure_user
 from flask import request
 from flask_socketio import emit
 
-from app.util.authentication import authenticate_source, ensure_user
-
-from app.models.user import User
-from app.models.device import Device
-
-from app import db
-from app import sio
-from app import job_queue
 
 @sio.on("connect")
 @authenticate_source()

@@ -1,10 +1,10 @@
 import base64
-
 from typing import Union
+
+from app.models.user import User
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
 from cryptography.hazmat.primitives.asymmetric.x25519 import X25519PublicKey
 
-from app.models.user import User
 
 def decode_b64 (msg: bytes) -> str:
     return base64.encodebytes(msg).decode("utf-8").strip()

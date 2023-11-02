@@ -1,18 +1,11 @@
 import dataclasses as dc
-
+from abc import ABC, ABCMeta, abstractmethod
 from typing import Union
-from abc import ABCMeta, ABC, abstractmethod
 
-from app.models.user import User
+from app import db, flask_app, sio
 from app.models.device import Device
-
-from app.util.exc import (
-    NotJobInstance, PriorityRangeError, UserDeviceNotFound
-)
-
-from app import db
-from app import sio
-from app import flask_app
+from app.models.user import User
+from app.util.exc import NotJobInstance, PriorityRangeError, UserDeviceNotFound
 
 RequestData = dict[str, Union[str, dict[str, str]]]
 MAX_RETRIES = 5

@@ -1,16 +1,13 @@
 from typing import Union
-from flask_socketio import ConnectionRefusedError, emit
 
-# Import Util Modules
-from app.util import api
-from app.util.jobs import ConfirmCreateChatJob, ConfirmMessageJob
-from app.util.authentication import authenticate_source, authenticate_user
-
+from app import job_queue, sio
 # Import module models (i.e. Organization)
 from app.models.user import User
-
-from app import sio
-from app import job_queue
+# Import Util Modules
+from app.util import api
+from app.util.authentication import authenticate_source, authenticate_user
+from app.util.jobs import ConfirmCreateChatJob, ConfirmMessageJob
+from flask_socketio import ConnectionRefusedError, emit
 
 RequestData = Union[str, dict[str, str]]
 

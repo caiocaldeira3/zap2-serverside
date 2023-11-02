@@ -1,11 +1,10 @@
 import time
 
+from app import job_queue
+from app.models.device import Device
+from app.models.user import User
 from sqlalchemy.sql.expression import func
 
-from app.models.user import User
-from app.models.device import Device
-
-from app import job_queue
 
 def job_handler () -> None:
     while True:

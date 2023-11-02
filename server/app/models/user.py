@@ -1,5 +1,6 @@
 from app import db
 
+
 # Define a User model
 class User (db.Model):
 
