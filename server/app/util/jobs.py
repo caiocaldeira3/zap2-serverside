@@ -2,9 +2,8 @@ import dataclasses as dc
 from abc import ABC, ABCMeta, abstractmethod
 from typing import Union
 
-from app import db, flask_app, sio
-from app.models.device import Device
-from app.models.user import User
+from app import flask_app, sio
+from app.services import user as ussr
 from app.util.exc import NotJobInstance, PriorityRangeError, UserDeviceNotFound
 
 RequestData = dict[str, Union[str, dict[str, str]]]
@@ -14,7 +13,6 @@ MAX_PRIORITY = 3
 
 @dc.dataclass(init=True)
 class Job (ABC):
-
     user_id: int = dc.field(init=True, default=None)
     data: RequestData = dc.field(init=True, default=None)
     retries: int = dc.field(init=True, default=0)
@@ -37,53 +35,47 @@ class AddUserDeviceJob (Job):
         sid = self.data["sid"]
         user_id = self.data["user_id"]
 
-        user = User.query.filter_by(id=user_id).one()
-        device = Device(socket_id=sid)
-        user.devices.append(device)
-
-        db.session.add(user)
-        db.session.add_all(user.devices)
-        db.session.commit()
+        ussr.add_user_device(user_id, sid)
 
 class CreateChatJob (Job):
     def solve (self) -> None:
-        user = User.query.filter_by(id=self.user_id).one()
-        if len(user.devices) == 0:
+        user = ussr.find_with_id(self.user_id)
+        if user.socket_id is None:
             raise UserDeviceNotFound
 
-        for device in user.devices:
+        else:
             with flask_app.app_context():
-                sio.emit("create-chat", self.data, to=device.socket_id)
+                sio.emit("create-chat", self.data, to=user.socket_id)
 
 class ConfirmCreateChatJob (Job):
     def solve (self) -> None:
-        owner = User.query.filter_by(id=self.user_id).one()
-        if len(owner.devices) == 0:
+        owner = ussr.find_with_id(self.user_id)
+        if owner.socket_id is None:
             raise UserDeviceNotFound
 
-        for device in owner.devices:
+        else:
             with flask_app.app_context():
-                sio.emit("confirm-create-chat", self.data, to=device.socket_id)
+                sio.emit("confirm-create-chat", self.data, to=owner.socket_id)
 
 class SendMessageJob (Job):
     def solve (self) -> None:
-        receiver = User.query.filter_by(id=self.user_id).one()
-        if len(receiver.devices) == 0:
+        receiver = ussr.find_with_id(self.user_id)
+        if receiver.socket_id is None:
             raise UserDeviceNotFound
 
-        for device in receiver.devices:
+        else:
             with flask_app.app_context():
-                sio.send(self.data, to=device.socket_id)
+                sio.send(self.data, to=receiver.socket_id)
 
 class ConfirmMessageJob (Job):
     def solve (self) -> None:
-        sender = User.query.filter_by(id=self.user_id).one()
-        if len(sender.devices) == 0:
+        sender = ussr.find_with_id(self.user_id)
+        if sender.socket_id is None:
             raise UserDeviceNotFound
 
-        for device in sender.devices:
+        else:
             with flask_app.app_context():
-                sio.emit("confirm-message", self.data, to=device.socket_id)
+                sio.emit("confirm-message", self.data, to=sender.socket_id)
 
 Jobs = Union[list[Job], dict[str, list[Job]]]
 

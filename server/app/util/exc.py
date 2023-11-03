@@ -27,3 +27,11 @@ class UserDeviceNotFound (Exception):
         super().__init__(
             "Target user is not connected to server"
         )
+
+class UserNotFound (Exception):
+    """
+        Raised when the target user could not be found on the database
+    """
+
+    def __init__ (self) -> None:
+        super().__init__("Target user not found")

@@ -3,6 +3,7 @@ from typing import Union
 from app import job_queue, sio
 # Import module models (i.e. Organization)
 from app.models.user import User
+from app.services import user as ussr
 # Import Util Modules
 from app.util import api
 from app.util.authentication import authenticate_source, authenticate_user
@@ -16,8 +17,8 @@ RequestData = Union[str, dict[str, str]]
 @authenticate_user()
 def handle_create_chat (sid: str, data: dict[str, RequestData]) -> None:
     try:
-        owner = User.query.filter_by(telephone=data["owner"]["telephone"]).one()
-        users = User.query.filter(User.telephone.in_(data["users"])).all()
+        owner = ussr.find_with_telephone(data["owner"]["telephone"])
+        users = ussr.find_many(data["users"])
 
         data.pop("users", None)
         for user in users:
@@ -34,7 +35,7 @@ def handle_create_chat (sid: str, data: dict[str, RequestData]) -> None:
 @authenticate_user()
 def handle_confirm_create_chat (sid: str, data: dict[str, RequestData]) -> None:
     try:
-        owner = User.query.filter_by(telephone=data["owner"]["telephone"]).one()
+        owner: User = ussr.find_with_telephone(telephone=data["owner"]["telephone"])
         user_tel = data["user"]["telephone"]
 
         resp_data = {
@@ -43,17 +44,16 @@ def handle_confirm_create_chat (sid: str, data: dict[str, RequestData]) -> None:
             "data": data
         }
 
-        if len(owner.devices) == 0:
+        if owner.socket_id is None:
             job_queue.add_job(owner.id, 2, ConfirmCreateChatJob, resp_data)
 
             return
 
-        for device in owner.devices:
-            try:
-                emit("confirm-create-chat", resp_data, to=device.socket_id)
+        try:
+            emit("confirm-create-chat", resp_data, to=owner.socket_id)
 
-            except ConnectionRefusedError:
-                job_queue.add_job(owner.id, 2, ConfirmCreateChatJob, resp_data)
+        except ConnectionRefusedError:
+            job_queue.add_job(owner._id, 2, ConfirmCreateChatJob, resp_data)
 
 
     except Exception as exc:
@@ -66,7 +66,7 @@ def handle_confirm_create_chat (sid: str, data: dict[str, RequestData]) -> None:
 @authenticate_user()
 def handle_message (sid: str, data: dict[str, RequestData]) -> None:
     try:
-        user = User.query.filter_by(telephone=data["receiver"]["telephone"]).one()
+        user = ussr.find_with_telephone(data["receiver"]["telephone"])
         api.send_message(user, data)
 
     except Exception as exc:
@@ -79,7 +79,7 @@ def handle_message (sid: str, data: dict[str, RequestData]) -> None:
 @authenticate_user()
 def handle_confirm_message (sid: str, data: dict[str, RequestData]) -> None:
     try:
-        sender = User.query.filter_by(telephone=data["sender"]["telephone"]).one()
+        sender: User = ussr(data["sender"]["telephone"])
         rcv_tel = data["receiver"]["telephone"]
 
         resp_data = {
@@ -88,18 +88,17 @@ def handle_confirm_message (sid: str, data: dict[str, RequestData]) -> None:
             "data": data
         }
 
-        if len(sender.devices) == 0:
+        if sender.socket_id is None:
             print("Queueing confirm message due to lack of devices")
-            job_queue.add_job(sender.id, 2, ConfirmMessageJob, resp_data)
+            job_queue.add_job(sender._id, 2, ConfirmMessageJob, resp_data)
 
             return
 
-        for device in sender.devices:
-            try:
-                emit("confirm-message", resp_data, to=device.socket_id)
+        try:
+            emit("confirm-message", resp_data, to=sender.socket_id)
 
-            except ConnectionRefusedError:
-                job_queue.add_job(sender.id, 2, ConfirmMessageJob, resp_data)
+        except ConnectionRefusedError:
+            job_queue.add_job(sender._id, 2, ConfirmMessageJob, resp_data)
 
     except Exception as exc:
         print(exc)

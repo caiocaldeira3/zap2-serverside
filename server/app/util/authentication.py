@@ -2,10 +2,9 @@ import os
 from collections.abc import Callable
 from functools import wraps
 
-from app import db, job_queue
-from app.models.device import Device
-from app.models.public_keys import OPKey
-from app.models.user import User
+from app import job_queue
+from app.models.user import OPKey, User
+from app.services import user as ussr
 from app.util.crypto import verify_signed_message
 from app.util.jobs import AddUserDeviceJob
 from flask import request, wrappers
@@ -38,11 +37,11 @@ def ensure_user () -> wrappers.Response:
             if request.headers.get("Signed-Message", None) is not None:
                 try:
                     sid, data = args
-                    user = User.query.filter_by(telephone=data["telephone"]).one()
+                    user = ussr.find_with_telephone(data["telephone"])
                     sgn_message = request.headers["Signed-Message"]
                     verify_signed_message(user, sgn_message)
 
-                    job_queue.add_job(-1, 0, AddUserDeviceJob, {"user_id": user.id, "sid": sid})
+                    job_queue.add_job(-1, 0, AddUserDeviceJob, {"user_id": user._id, "sid": sid})
 
                     return f(*args, "ok", **kwargs)
 
@@ -64,20 +63,16 @@ def ensure_user () -> wrappers.Response:
                         id_key=auth_data["id_key"],
                         sgn_key=auth_data["sgn_key"],
                         ed_key=auth_data["ed_key"],
-                        devices=[ Device(socket_id=sid) ],
+                        devices=sid,
                         opkeys=[
-                            OPKey(key_id=opkey["id"], opkey=opkey["key"])
+                            OPKey(key_idx=opkey["id"], opkey=opkey["key"])
                             for opkey in auth_data["opkeys"]
                         ],
-                        telephone=auth_data.get("telephone"),
-                        email=auth_data.get("email", None),
-                        description=auth_data.get("description", None)
+                        telephone=auth_data["telephone"],
+                        desc=auth_data.get("description", "default user")
                     )
 
-                    db.session.add(user)
-                    db.session.add_all(user.devices)
-                    db.session.add_all(user.opkeys)
-                    db.session.commit()
+                    ussr.insert_user(user)
 
                     return f(sid, {
                         "telephone": user.telephone
@@ -102,8 +97,8 @@ def authenticate_user () -> wrappers.Response:
         def decorated(*args, **kwargs):
             try:
                 sid, data = args
-                sgn_message = data.pop("Signed-Message")
-                user = User.query.filter_by(telephone=data.pop("telephone")).one()
+                sgn_message = data["Signed-Message"]
+                user = ussr.find_with_telephone(data["telephone"])
 
                 data = data.pop("body")
                 verify_signed_message(user, sgn_message)

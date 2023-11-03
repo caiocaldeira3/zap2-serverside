@@ -1,24 +1,21 @@
+import atexit
 import os
 import sys
-import atexit
-import dotenv
-
 from pathlib import Path
+
+import dotenv
 
 base_path = Path(__file__).resolve().parent
 dotenv.load_dotenv(base_path / ".env", override=False)
 
 sys.path.append(str(base_path))
 
-from app.models.device import Device
+from app import flask_app, sio
+from app.services import user as ussr
 
-from app import db
-from app import sio
-from app import flask_app
 
 def exit_handler():
-    Device.query.delete()
-    db.session.commit()
+    ussr.disconect_users()
 
 atexit.register(exit_handler)
 

@@ -1,33 +1,36 @@
-from app import db
+import dataclasses as dc
+from typing import Any
+
+from bson import ObjectId
 
 
-# Define a User model
-class User (db.Model):
+@dc.dataclass()
+class OPKey ():
+    key_idx: int
+    opkey: str
 
-    __tablename__   : str = "user"
-    id              : db.Integer = db.Column(db.Integer, primary_key=True)
+    def to_insert (self) -> dict[str, Any]:
+        return {
+            field.name: self.__getattribute__(field.name)
+            for field in dc.fields(OPKey)
+        }
+@dc.dataclass()
+class User:
+    name:str
+    telephone: str  # UNIQUE
+    id_key: str
+    sgn_key: str
+    ed_key: str
+    socket_id: str | None
+    opkeys: list[OPKey]
+    desc: str = dc.field(default="default description")
+    _id: ObjectId = dc.field(default_factory=ObjectId)
 
-    # User Name
-    name            : db.String = db.Column(db.String(128), nullable=False)
-
-    # Identification Data: email & password
-    telephone       : db.String = db.Column(db.String(15), nullable=False, unique=True)
-    id_key          : db.String = db.Column(db.String(128), nullable=False)
-    sgn_key         : db.String = db.Column(db.String(128), nullable=False)
-    ed_key          : db.String = db.Column(db.String(128), nullable=False)
-
-    date_created    : db.DateTime = db.Column(db.DateTime, default=db.func.now())
-    date_modified   : db.DateTime = db.Column(
-        db.DateTime,  default=db.func.now(), onupdate=db.func.now()
-    )
-
-    # Extra Information
-    email           : db.String = db.Column(db.String(128), nullable=True, unique=True)
-    description     : db.Text = db.Column(db.Text(500), nullable=True)
-
-    # Foreign Keys
-    opkeys          : any = db.relationship("OPKey", backref="owner")
-    devices         : any = db.relationship("Device", backref="user")
-
-    def __repr__ (self) -> str:
-        return f"<User {self.name}>"
+    def to_insert (self) -> dict[str, Any]:
+        return {
+            field.name: (
+                self.__getattribute__(field.name)
+                if field.name != "opkeys" else
+                [ key.to_insert() for key in self.opkeys ]
+            ) for field in dc.fields(User)
+        }

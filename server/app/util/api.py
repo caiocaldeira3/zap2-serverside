@@ -1,6 +1,5 @@
 from app import job_queue
-from app.models.public_keys import OPKey
-from app.models.user import User
+from app.models.user import OPKey, User
 from app.util.jobs import CreateChatJob, SendMessageJob
 from flask_socketio import emit, send
 
@@ -13,7 +12,7 @@ def create_chat (owner: User, user: User, opkeys: list[OPKey], req_info: dict) -
             "owner": {
                 "name": owner.name,
                 "telephone": owner.telephone,
-                "description": owner.description,
+                "description": owner.desc,
                 "chat_id": req_info["owner"]["chat_id"],
                 "keys": {
                     "pb_keys": {
@@ -24,24 +23,23 @@ def create_chat (owner: User, user: User, opkeys: list[OPKey], req_info: dict) -
             },
             "user": {
                 "telephone": user.telephone,
-                "used_keys": [ opkeys[0].key_id, opkeys[1].key_id ],
+                "used_keys": [ opkeys[0].key_idx, opkeys[1].key_idx ],
                 "dh_ratchet": req_info["dh_ratchet"]
             },
             "name": req_info["name"],
         }
     }
 
-    if len(user.devices) == 0:
-        job_queue.add_job(user.id, 1, CreateChatJob, data)
-        return
+    if user.socket_id is None:
+        job_queue.add_job(user._id, 1, CreateChatJob, data)
 
-    for device in user.devices:
+    else:
         try:
-            emit("create-chat", data, to=device.socket_id)
+            emit("create-chat", data, to=user.socket_id)
 
         except ConnectionRefusedError as exc:
             print(f"Queueing chat creation between {owner.telephone} and {user.telephone}")
-            job_queue.add_job(user.id, 1, CreateChatJob, data)
+            job_queue.add_job(user._id, 1, CreateChatJob, data)
 
         except Exception as exc:
             print(exc)
@@ -56,17 +54,16 @@ def send_message (receiver: User, req_info: dict) -> None:
         "data": req_info
     }
 
-    if len(receiver.devices) == 0:
-        job_queue.add_job(receiver.id, 2, SendMessageJob, data)
-        return
+    if receiver.socket_id is None:
+        job_queue.add_job(receiver._id, 2, SendMessageJob, data)
 
-    for device in receiver.devices:
+    else:
         try:
-            send(data, to=device.socket_id)
+            send(data, to=receiver.socket_id)
 
         except ConnectionRefusedError as exc:
             print(f"Queueing send messsage to {receiver.telephone}")
-            job_queue.add_job(receiver.id, 2, SendMessageJob, data)
+            job_queue.add_job(receiver._id, 2, SendMessageJob, data)
 
         except Exception as exc:
             print(exc)

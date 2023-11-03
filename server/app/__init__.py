@@ -2,11 +2,7 @@ import eventlet
 # Import flask and template operators
 from flask import Flask
 from flask_cors import CORS
-# Import Migration Module
-from flask_migrate import Migrate
 from flask_socketio import SocketIO
-# Import SQLAlchemy
-from flask_sqlalchemy import SQLAlchemy
 
 # Import Util Modules
 # from app.util.responses import NotFoundError
@@ -18,11 +14,6 @@ CORS(flask_app)
 # Configurations
 flask_app.config.from_object('config')
 sio = SocketIO(flask_app, async_mode="eventlet")
-
-# Define the database object which is imported
-# by modules and controllers
-db = SQLAlchemy(flask_app)
-migrate = Migrate(flask_app, db)
 
 from app.util.jobs import JobQueue
 
@@ -38,14 +29,5 @@ from app.util.job_handler import job_handler
 #def not_found (error: Exception) -> wrappers.Response:
 #    return NotFoundError
 
-import app.modules.auth.events
-import app.modules.user.events
-
-# Build the database:
-# This will create the database file using SQLAlchemy
-
-db.create_all()
-
-# Create background task to send tasks
 eventlet.monkey_patch()
 sio.start_background_task(job_handler)
