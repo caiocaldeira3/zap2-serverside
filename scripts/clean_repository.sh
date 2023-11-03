@@ -1,4 +1,4 @@
 #!/bin/bash
 
-cd ../server
-../scripts/clean_database.sh server
+
+python clean_database.py
