@@ -35,7 +35,7 @@ def handle_create_chat (sid: str, data: dict[str, RequestData]) -> None:
 @authenticate_user()
 def handle_confirm_create_chat (sid: str, data: dict[str, RequestData]) -> None:
     try:
-        owner: User = ussr.find_with_telephone(telephone=data["owner"]["telephone"])
+        owner: User = ussr.find_with_telephone(data["owner"]["telephone"])
         user_tel = data["user"]["telephone"]
 
         resp_data = {
@@ -45,7 +45,7 @@ def handle_confirm_create_chat (sid: str, data: dict[str, RequestData]) -> None:
         }
 
         if owner.socket_id is None:
-            job_queue.add_job(owner.id, 2, ConfirmCreateChatJob, resp_data)
+            job_queue.add_job(owner._id, 2, ConfirmCreateChatJob, resp_data)
 
             return
 
@@ -79,7 +79,7 @@ def handle_message (sid: str, data: dict[str, RequestData]) -> None:
 @authenticate_user()
 def handle_confirm_message (sid: str, data: dict[str, RequestData]) -> None:
     try:
-        sender: User = ussr(data["sender"]["telephone"])
+        sender: User = ussr.find_with_telephone(data["sender"]["telephone"])
         rcv_tel = data["receiver"]["telephone"]
 
         resp_data = {

@@ -1,4 +1,3 @@
-import eventlet
 # Import flask and template operators
 from flask import Flask
 from flask_cors import CORS
@@ -13,7 +12,7 @@ CORS(flask_app)
 
 # Configurations
 flask_app.config.from_object('config')
-sio = SocketIO(flask_app, async_mode="eventlet")
+sio = SocketIO(flask_app, async_mode="gevent")
 
 from app.util.jobs import JobQueue
 
@@ -29,5 +28,4 @@ from app.util.job_handler import job_handler
 #def not_found (error: Exception) -> wrappers.Response:
 #    return NotFoundError
 
-eventlet.monkey_patch()
 sio.start_background_task(job_handler)

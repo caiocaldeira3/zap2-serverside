@@ -5,6 +5,7 @@ from typing import Union
 from app import flask_app, sio
 from app.services import user as ussr
 from app.util.exc import NotJobInstance, PriorityRangeError, UserDeviceNotFound
+from bson import ObjectId
 
 RequestData = dict[str, Union[str, dict[str, str]]]
 MAX_RETRIES = 5
@@ -40,6 +41,8 @@ class AddUserDeviceJob (Job):
 class CreateChatJob (Job):
     def solve (self) -> None:
         user = ussr.find_with_id(self.user_id)
+        print(user)
+
         if user.socket_id is None:
             raise UserDeviceNotFound
 
@@ -125,7 +128,7 @@ class JobQueue:
 
         return failed_jobs
 
-    def resolve_jobs (self, user_id: int, priority: int = None) -> bool:
+    def resolve_jobs (self, user_id: ObjectId, priority: int = None) -> bool:
         if self.job_dict.get(user_id, None) is None:
             return False
 

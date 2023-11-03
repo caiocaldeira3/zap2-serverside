@@ -1,5 +1,4 @@
-import time
-
+import gevent
 from app import job_queue
 from app.services import user as ussr
 
@@ -13,4 +12,4 @@ def job_handler () -> None:
 
         job_queue.resolve_jobs(-1, priority=0)
 
-        time.sleep(5)
+        gevent.sleep(5)

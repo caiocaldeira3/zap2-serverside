@@ -41,7 +41,9 @@ def ensure_user () -> wrappers.Response:
                     sgn_message = request.headers["Signed-Message"]
                     verify_signed_message(user, sgn_message)
 
-                    job_queue.add_job(-1, 0, AddUserDeviceJob, {"user_id": user._id, "sid": sid})
+                    job_queue.add_job(-1, 0, AddUserDeviceJob, {
+                        "user_id": str(user._id), "sid": sid
+                    })
 
                     return f(*args, "ok", **kwargs)
 
@@ -63,7 +65,7 @@ def ensure_user () -> wrappers.Response:
                         id_key=auth_data["id_key"],
                         sgn_key=auth_data["sgn_key"],
                         ed_key=auth_data["ed_key"],
-                        devices=sid,
+                        socket_id=sid,
                         opkeys=[
                             OPKey(key_idx=opkey["id"], opkey=opkey["key"])
                             for opkey in auth_data["opkeys"]

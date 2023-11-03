@@ -17,8 +17,6 @@ BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 APP_PORT = int(os.environ.get("PORT", 5000))
 
-# Define the database - we are working with
-# SQLite for this example
 MONGO_CONN = os.environ["MONGO_CONNECTION_STRING"]
 MONGO_DB = os.environ["MONGO_DATABASE"]
 

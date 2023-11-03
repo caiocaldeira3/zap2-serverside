@@ -12,7 +12,7 @@ def get_client (conn_str: str) -> pymongo.MongoClient:
         permissions. Returns the client if made through mongomock
         :returns:    MongoClient.
     """
-    client = pymongo.MongoClient(conn_str)
+    client = pymongo.MongoClient(conn_str, maxPoolSize=50)
     try:
         # The ismaster command is cheap and does not require auth.
         client.admin.command("ismaster")
@@ -105,8 +105,7 @@ class Mongo:
         return result_id
 
     def update_one (
-        self, filter: dict[str, Any], update_data: dict[str, dict[str, Any]],
-        array_filters: list[dict[str, dict[str, Any]]] = ()
+        self, filter: dict[str, Any], update_data: dict[str, dict[str, Any]]
     ) -> bool:
         """
             Updates a formated dict[str, Any] in the connected colletion, uses the filter data to
@@ -117,9 +116,7 @@ class Mongo:
             :param array_filters:   filter extension if filters are nested inside a array
             :returns:               true if the query has been acknoledged and a object modified
         """
-        result = self.collection.update_one(
-            filter, update_data, array_filters=array_filters
-        )
+        result = self.collection.update_one(filter, update_data)
 
         return result.acknowledged and result.modified_count == 1
 
@@ -151,15 +148,3 @@ class Mongo:
         """
 
         return self.collection.find_one_and_delete(data)
-
-    def aggregate_query (self, pipeline: list, session: ClientSession = None) -> dict[str, Any]:
-        """
-            Performs an agregate query thorugh the pipeline provided
-            :param pipeline:    the query pipeline, a list of dictionaries
-            :param session:     parameter to write on transaction, should only be used
-                                when connecting to a replica set
-            :returns:            the matched objects
-        """
-        result = self.collection.aggregate(pipeline, session=session)
-
-        return result

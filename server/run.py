@@ -1,15 +1,10 @@
 import atexit
-import os
-import sys
-from pathlib import Path
 
-import dotenv
+from gevent import monkey
 
-base_path = Path(__file__).resolve().parent
-dotenv.load_dotenv(base_path / ".env", override=False)
+_ = monkey.patch_all()
 
-sys.path.append(str(base_path))
-
+import config
 from app import flask_app, sio
 from app.services import user as ussr
 
@@ -20,5 +15,4 @@ def exit_handler():
 atexit.register(exit_handler)
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    sio.run(flask_app, host="0.0.0.0", port=port, use_reloader=False)
+    sio.run(flask_app, host="0.0.0.0", port=config.APP_PORT, use_reloader=False)

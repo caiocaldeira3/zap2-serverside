@@ -17,7 +17,7 @@ class OPKey ():
 @dc.dataclass()
 class User:
     name:str
-    telephone: str  # UNIQUE
+    telephone: str
     id_key: str
     sgn_key: str
     ed_key: str
@@ -25,6 +25,12 @@ class User:
     opkeys: list[OPKey]
     desc: str = dc.field(default="default description")
     _id: ObjectId = dc.field(default_factory=ObjectId)
+
+    def __post_init__ (self) -> None:
+        self.opkeys = [
+            OPKey(**key) if not isinstance(key, OPKey) else key
+            for key in self.opkeys
+        ]
 
     def to_insert (self) -> dict[str, Any]:
         return {

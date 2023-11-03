@@ -16,7 +16,7 @@ def handle_connect (sid: str, data: dict[str, str], status: str) -> None:
         "msg": "Session Authenticated",
         "data": {
             "user": {
-                "id": user._id,
+                "id": str(user._id),
                 "telephone": user.telephone
             }
         }

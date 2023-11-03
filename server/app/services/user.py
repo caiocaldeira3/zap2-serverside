@@ -1,5 +1,5 @@
 import config
-from app.models.user import OPKey, User
+from app.models.user import User
 from app.util import mongodb
 from app.util.exc import UserNotFound
 from bson import ObjectId
@@ -12,18 +12,16 @@ def find_with_telephone (tel: str) -> User:
     if result is None:
         raise UserNotFound
 
-    result["opkeys"] = [ OPKey(**key) for key in result.get("opkeys", ()) ]
-
     return User(**result)
 
 def find_with_id (user_id: str) -> User:
     mdb = mongodb.Mongo(config.MONGO_CONN, config.MONGO_DB, "user")
+    if not isinstance(user_id, ObjectId):
+        user_id = ObjectId(user_id)
 
     result = mdb.find_one({ "_id": user_id })
     if result is None:
         raise UserNotFound
-
-    result["opkeys"] = [ OPKey(**key) for key in result.get("opkeys", ()) ]
 
     return User(**result)
 
@@ -67,6 +65,8 @@ def disconect_users () -> None:
 
 def add_user_device (user_id: ObjectId, socket_id: str) -> bool:
     mdb = mongodb.Mongo(config.MONGO_CONN, config.MONGO_DB, "user")
+    if not isinstance(user_id, ObjectId):
+        user_id = ObjectId(user_id)
 
     return mdb.update_one(
         filter={ "_id": user_id },
@@ -77,4 +77,4 @@ def init_server_db () -> None:
     mdb = mongodb.Mongo(config.MONGO_CONN, config.MONGO_DB, "user")
 
     mdb.drop_collection()
-    mdb.create_index_keys(("telephone", "socket_id"), (True, None))
+    mdb.create_index_keys(("telephone", "socket_id"), (True, False))

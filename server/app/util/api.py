@@ -5,9 +5,10 @@ from flask_socketio import emit, send
 
 
 def create_chat (owner: User, user: User, opkeys: list[OPKey], req_info: dict) -> None:
+    chat_id = req_info["owner"]["chat_id"]
     data = {
         "status": "pending",
-        "msg": f"Creating chat between {owner.telephone} and {user.telephone}",
+        "msg": f"Creating chat {chat_id} between {owner.telephone} and {user.telephone}",
         "data": {
             "owner": {
                 "name": owner.name,
