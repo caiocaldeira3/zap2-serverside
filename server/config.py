@@ -1,10 +1,21 @@
 import os
+import sys
+from pathlib import Path
+
+import dotenv
+
+base_path = Path(__file__).resolve().parent
+dotenv.load_dotenv(base_path / ".env", override=False)
+
+sys.path.append(str(base_path))
 
 # Statement for enabling the development environment
 DEBUG = True
 
 # Define the application directory
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+
+APP_PORT = int(os.environ.get("PORT", 5000))
 
 # Define the database - we are working with
 # SQLite for this example
